@@ -1,0 +1,20 @@
+[2026-02-28 03:12:30] Processing QR: 202510150099
+[2026-02-28 03:12:30] User not found for QR: 202510150099
+[2026-02-28 03:29:35] Processing QR: 800c2324751923bf
+[2026-02-28 03:29:37] Success: rain
+[2026-02-28 03:29:38] Processing QR: 800c2324751923bf
+[2026-02-28 03:29:39] Duplicate scan for: rain
+[2026-02-28 03:29:58] Processing QR: 7ac8741309c4670d
+[2026-02-28 03:29:59] Inactive member scanned: rain
+[2026-02-28 03:30:09] Processing QR: 800c2324751923bf
+[2026-02-28 03:30:11] Duplicate scan for: rain
+[2026-02-28 03:31:02] Processing QR: 202510150099
+[2026-02-28 03:31:02] User not found for QR: 202510150099
+[2026-02-28 03:42:35] Processing QR: 4789ea65041f7cbf
+[2026-02-28 03:42:37] Success: mark
+[2026-02-28 13:05:30] Processing QR: 800c2324751923bf
+[2026-02-28 13:05:31] Duplicate scan for: rain
+[2026-02-28 15:44:36] Processing QR: 4789ea65041f7cbf
+[2026-02-28 15:44:38] Duplicate scan for: mark
+[2026-03-01 10:19:09] Processing QR: 4789ea65041f7cbf
+[2026-03-01 10:19:11] Success: mark
