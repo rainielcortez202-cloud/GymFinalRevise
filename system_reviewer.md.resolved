@@ -1,0 +1,77 @@
+# 🎓 ARTS GYM: ULTIMATE CAPSTONE DEFENSE REVIEWER
+
+This document provides a **senior-level technical breakdown** of the Arts Gym Management System. It is the most comprehensive resource for your final defense, covering every detail of the frontend, backend, database, and security layers.
+
+---
+
+## 🏆 CATEGORY I: SECURITY & ROW LEVEL SECURITY (RLS)
+*Security is the "shield" of your system. Be ready to explain these in depth.*
+
+### 1.1 Row Level Security (RLS) - "Ground Truth" Isolation
+*   **What is it?**: A PostgreSQL feature that allows the database itself to filter records. Unlike normal databases where a "Select" gives you everything, RLS enforces rules at the engine level.
+*   **Implementation**: 
+    *   `ALTER TABLE users ENABLE ROW LEVEL SECURITY;`
+    *   **Policy (Isolation)**: `auth.uid()::text = id::text`. This ensures a member cannot even *see* another member's row, even if they bypassed all PHP checks.
+    *   **Policy (Admins)**: A subquery `EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')` allows admins to see all rows.
+*   **Significance**: This is an "Industry Standard" security practice for multi-tenant applications.
+
+### 1.2 Cross-Site Request Forgery (CSRF) Protection
+*   **Technique**: Synchronizer Token Pattern using `hash_equals()`.
+*   **Implementation**: 
+    *   Generates a cryptographically secure 32-byte token stored in `$_SESSION['csrf_token']`.
+    *   **AJAX Protection**: Every AJAX POST request includes a custom `X-CSRF-TOKEN` header.
+
+### 1.3 SQL Injection (SQLi) Defense
+*   **Technique**: Parameterized Queries via **PDO (PHP Data Objects)**.
+*   **Implementation**: 100% of queries use placeholders. User input is never part of the SQL command string.
+
+---
+
+## 📊 CATEGORY II: DATABASE ENGINE & INDEXING "TYPES"
+*Technical details found in `supabase_setup.sql` and `add_indexes.php`.*
+
+### 2.1 Index Types Used
+| Index Name | Type | Purpose |
+| :--- | :--- | :--- |
+| **B-Tree** (Default) | Standard | Fast O(log n) lookups for `email`, `full_name`, and `id`. |
+| **GIN** (Generalized Inverted Index) | Advanced | Used on the `fts` (Full-Text Search) column. It maps words to IDs for instant text searching. |
+| **Composite B-Tree** | Multi-column | `(user_id, expires_at DESC)` optimized for finding the *latest* membership record. |
+
+### 2.2 Full-Text Search (FTS) Logic
+*   **Generated Column**: The `fts` column is a `tsvector` type, automatically updated by Postgres: `generated always as (to_tsvector('english', full_name || ' ' || email))`.
+*   **Search Algorithm**: Uses `plainto_tsquery('english', query)` to match keywords regardless of exact phrasing.
+
+### 2.3 Advanced SQL: LATERAL JOINs
+*   **Algorithm**: Correlated subquery execution.
+*   **Why?**: It avoids the heavy overhead of a global `GROUP BY` by looking up the "Top 1" expiry record specifically for the 10 users being displayed.
+
+---
+
+## ⚙️ CATEGORY III: BACKEND MECHANICS & ALGORITHMS
+*The "Intelligence" of the system.*
+
+*   **Password Hashing**: `Bcrypt` algorithm via `password_hash()`. Includes an internal cost factor (10) and random salting.
+*   **QR Encoding**: `Level L` (7% Error Correction). Data is encoded as a **Hexadecimal String** to keep the payload URL-safe and compact.
+*   **Frontend Debouncing**: A 300ms "Search Timer" that resets on every keystroke, ensuring the server only works after the user finishes typing.
+*   **Selective Status Syncing**: A "Lazy-Load" sync pattern. Only members on the current page are reconciled against the `sales` table during request time.
+
+---
+
+## 📂 CATEGORY IV: COMPREHENSIVE FILE REVIEWER
+
+| Directory | File | Core Method / Technique |
+| :--- | :--- | :--- |
+| **Root** | `connection.php` | SSL encrypted PDO connection to port `6543`. |
+| **Root** | `register.php` | Cryptographic hex generation for `verification_token`. |
+| **Includes**| `security.php` | Recursive logic for global input truncation (255 chars). |
+| **Includes**| `status_sync.php`| CTE-based bulk status reconciliation. |
+| **Utility**| `generate_qr.php` | `ob_clean()` buffer flushing for PNG image integrity. |
+| **Admin** | `reports.php` | Statistical aggregation via `EXTRACT(MONTH FROM ...)` queries. |
+
+---
+
+## 📢 DEFENSE TIPS (ADVANCED)
+
+1.  **If asked about scalability**: Mention the **GIN Index** and **Lateral Joins**. Explain that these allow the system to handle 10,000+ members without slowing down.
+2.  **If asked about "Type of QR"**: Explain it's a **QR Code Model 2**, rendered as a PNG image stream, containing a unique 16-character hex identifier.
+3.  **If asked about RLS**: Explain that it is the "Final Line of Defense." Even with a major PHP bug, RLS ensures no user can ever see another's data.
